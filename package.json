@@ -1,0 +1,9 @@
+{
+    "name": "PLMQ",
+    "description": "PrairieLearn Message Queue test",
+    "version": "0.0.1",
+    "private": true,
+    "dependencies": {
+        "amqplib": "*"
+    }
+}
