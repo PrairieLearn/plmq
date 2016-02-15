@@ -7,6 +7,8 @@ var result_queue = 'cs421_result';
 
 var gid_counter = 1;
 
+var file_data = "#include <stdio.h>\nvoid main() {\n    printf(\"The answer is 42.\\n\");\n}\n";
+
 amqp.connect('amqp://localhost?heartbeat=10', function(err, conn) {
     if (err) {console.log(err); process.exit(1);}
     conn.createChannel(function(err, ch) {
@@ -32,8 +34,8 @@ amqp.connect('amqp://localhost?heartbeat=10', function(err, conn) {
                     gid = gid_counter;
                     gid_counter++;
                     console.log('Sending grading job ' + gid);
-                    job = {gid: gid};
-                    ch.sendToQueue(grading_queue, new Buffer(JSON.stringify(job)));
+                    job = {gid: gid, file_data: file_data};
+                    ch.sendToQueue(grading_queue, new Buffer(JSON.stringify(job)), {persistent: true});
                 }, 1000);
             });
         });
