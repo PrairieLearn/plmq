@@ -1,5 +1,5 @@
 
-# PMMQ - PrairieLearn Message Queues for autograders (mockup)
+# PLMQ - PrairieLearn Message Queues for autograders (mockup)
 
     # install RabbitMQ and run the server
     git clone git@github.com:/PrairieLearn/plmq
