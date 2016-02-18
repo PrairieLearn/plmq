@@ -23,8 +23,11 @@ var gradingData = {
         "date": "2015-09-21T22:35:58Z",   // datetime when the student submitted this answer
         "type": null,                     // "check" or "score", whether to just check format/compile or to determine a score
         "submittedAnswer": {              // answer submitted by student that needs to be graded (format determined by question server.js)
-            "fileName": "printnumber.c",
-            "fileData": "#include <stdio.h>\nvoid main() {\n    printf(\"The answer is 42.\\n\");\n}\n"
+            "answerFile": {
+                "name": "printnumber.c",
+                "encoding": "utf8",       // either "utf8" or "base64"
+                "data": "#include <stdio.h>\nvoid main() {\n    printf(\"The answer is 42.\\n\");\n}\n"
+            }
         }
     }
 };

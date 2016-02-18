@@ -54,16 +54,23 @@ amqp.connect('amqp://localhost?heartbeat=10', function(err, conn) {
 });
 
 function grade(gradingData, callback) {
-    console.log("File data:\n--------------\n" + gradingData.submission.submittedAnswer.fileData + "--------------");
+    var file = gradingData.submission.submittedAnswer.answerFile;
+    if (file.encoding == 'utf8') {
+        console.log('File: ' + file.name + '\n--------------\n' + file.data + '--------------');
+    } else if (file.encoding == 'base64') {
+        console.log('File data is Base64 encoded.');
+    } else {
+        console.log('Unknown encoding for file: ' + file.encoding);
+    }
     var ret = JSON.parse(JSON.stringify(resultData)); // clone resultData
-    if (gradingData.submission.type == "check") {
-        console.log("Doing compile check...");
-    } else if (gradingData.submission.type == "score") {
+    if (gradingData.submission.type == 'check') {
+        console.log('Doing compile check...');
+    } else if (gradingData.submission.type == 'score') {
         var score = Math.floor(Math.random() * 100);
-        console.log("Computing question score = " + score);
+        console.log('Computing question score = ' + score);
         ret.grading.score = score;
     } else {
-        console.log("ERROR: unknown submission.type: " + gradingData.submission.type);
+        console.log('ERROR: unknown submission.type: ' + gradingData.submission.type);
     }
     callback(null, ret);
 }
