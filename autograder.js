@@ -2,8 +2,8 @@
 
 var amqp = require('amqplib/callback_api');
 
-var grading_queue = 'cs421_grading';
-var result_queue = 'cs421_result';
+var grading_queue = 'grading';
+var result_queue = 'result';
 
 var resultData = {
     "gid": null,                          // grading job ID
@@ -38,7 +38,7 @@ amqp.connect('amqp://localhost?heartbeat=10', function(err, conn) {
                     }
                     var gid = gradingData.gid;
                     console.log('######################################################################');
-                    console.log('Received grading job ' + gid + ' for ' + gradingData.submission.type);
+                    console.log('Received grading job ' + gid + ' for ' + gradingData.gradingType);
                     grade(gradingData, function(err, result) {
                         if (err) {console.log(err); process.exit(1);}
 
@@ -54,23 +54,16 @@ amqp.connect('amqp://localhost?heartbeat=10', function(err, conn) {
 });
 
 function grade(gradingData, callback) {
-    var file = gradingData.submission.submittedAnswer.answerFile;
-    if (file.encoding == 'utf8') {
-        console.log('File: ' + file.name + '\n--------------\n' + file.data + '--------------');
-    } else if (file.encoding == 'base64') {
-        console.log('File data is Base64 encoded.');
-    } else {
-        console.log('Unknown encoding for file: ' + file.encoding);
-    }
-    var ret = JSON.parse(JSON.stringify(resultData)); // clone resultData
-    if (gradingData.submission.type == 'check') {
-        console.log('Doing compile check...');
-    } else if (gradingData.submission.type == 'score') {
-        var score = Math.floor(Math.random() * 100);
-        console.log('Computing question score = ' + score);
-        ret.grading.score = score;
-    } else {
-        console.log('ERROR: unknown submission.type: ' + gradingData.submission.type);
+    var ret = {
+        gid: gradingData.gid,
+        grading: {
+            score: null,
+        },
+    };
+    if (gradingData.gradingType == 'check') {
+        ret.grading.feedback = 'This is some feedback';
+    } else if (gradingData.gradingType == 'score') {
+        ret.grading.score = 1;
     }
     callback(null, ret);
 }
