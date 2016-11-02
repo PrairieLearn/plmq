@@ -6,7 +6,7 @@ var grading_queue = 'grading';
 var result_queue = 'result';
 
 var resultData = {
-    "gid": null,                          // grading job ID
+    "gradingId": null,                    // grading job ID
     "grading": {
         "score": null,                    // score in [0, 1], or null if submission.type is "check"
         "feedback": {                     // feedback shown to student, format determined by server answer.html
@@ -34,16 +34,17 @@ amqp.connect('amqp://localhost?heartbeat=10', function(err, conn) {
                     try {
                         var gradingData = JSON.parse(msg.content.toString());
                     } catch (e) {
-                        console.log('ERROR decoding msg', msg, e);
+                        return console.log('ERROR decoding msg', msg, e);
                     }
-                    var gid = gradingData.gid;
+                    var gradingId = gradingData.gradingId;
                     console.log('######################################################################');
-                    console.log('Received grading job ' + gid + ' for ' + gradingData.gradingType);
+                    console.log('Received grading job ' + gradingId + ' for ' + gradingData.submissionType);
+                    console.log('msg.content', msg.content.toString());
                     grade(gradingData, function(err, result) {
                         if (err) {console.log(err); process.exit(1);}
 
-                        console.log('Completed grading for job ' + gid);
-                        result.gid = gid;
+                        console.log('Completed grading for job ' + gradingId);
+                        result.gradingId = gradingId;
                         ch.sendToQueue(result_queue, new Buffer(JSON.stringify(result)), {persistent: true});
                         ch.ack(msg);
                     });
@@ -55,15 +56,19 @@ amqp.connect('amqp://localhost?heartbeat=10', function(err, conn) {
 
 function grade(gradingData, callback) {
     var ret = {
-        gid: gradingData.gid,
+        gradingId: gradingData.gradingId,
         grading: {
             score: null,
         },
     };
-    if (gradingData.gradingType == 'check') {
+    if (gradingData.submission.type == 'check') {
         ret.grading.feedback = 'This is some feedback';
-    } else if (gradingData.gradingType == 'score') {
-        ret.grading.score = 1;
+    } else if (gradingData.submission.type == 'score') {
+        if (/correct/.test(gradingData.submission.submittedAnswer.code)) {
+            ret.grading.score = 1;
+        } else {
+            ret.grading.score = 0;
+        }
     }
     callback(null, ret);
 }
